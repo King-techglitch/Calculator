@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scientific Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="calculator" role="application" aria-label="Scientific calculator">
+    <header class="top-row">
+      <div class="display-wrap">
+        <div class="display" id="display" aria-live="polite" role="status">0</div>
+        <div class="subdisplay" id="subdisplay" aria-hidden="true"></div>
+      </div>
+
+      <div class="history-panel" id="historyPanel" aria-label="History">
+        <div class="history-header">
+          <span>History</span>
+          <div class="history-actions">
+            <button class="history-btn" id="clearHistory" title="Clear history">Clear</button>
+            <button class="history-btn" id="toggleHistory" title="Toggle history">Hide</button>
+          </div>
+        </div>
+        <ul id="historyList" class="history-list" aria-live="polite"></ul>
+      </div>
+    </header>
+
+    <section class="keys" role="group" aria-label="Calculator keys">
+      <!-- Memory row -->
+      <button class="btn mem" data-action="mc" aria-label="Memory clear">MC</button>
+      <button class="btn mem" data-action="mr" aria-label="Memory recall">MR</button>
+      <button class="btn mem" data-action="mplus" aria-label="Memory add">M+</button>
+      <button class="btn mem" data-action="mminus" aria-label="Memory subtract">M-</button>
+
+      <!-- Scientific functions row -->
+      <button class="btn func" data-func="sin" aria-label="sine">sin</button>
+      <button class="btn func" data-func="cos" aria-label="cosine">cos</button>
+      <button class="btn func" data-func="tan" aria-label="tangent">tan</button>
+      <button class="btn func" data-func="^" aria-label="power">x^y</button>
+
+      <button class="btn func" data-func="ln" aria-label="natural log">ln</button>
+      <button class="btn func" data-func="log" aria-label="base-10 log">log</button>
+      <button class="btn func" data-func="pow" aria-label="power function">pow</button>
+      <button class="btn func" data-func="sqrt" aria-label="square root">√</button>
+
+      <!-- Functions / parentheses -->
+      <button class="btn" data-action="percent" aria-label="percent">%</button>
+      <button class="btn" data-action="paren" data-value="(" aria-label="open parenthesis">(</button>
+      <button class="btn" data-action="paren" data-value=")" aria-label="close parenthesis">)</button>
+      <button class="btn" data-action="toggleSign" aria-label="plus minus">+/-</button>
+
+      <!-- Control row -->
+      <button class="btn" data-action="clear" aria-label="clear">C</button>
+      <button class="btn" data-action="delete" aria-label="delete">DEL</button>
+      <button class="btn operator" data-value="÷" aria-label="divide">÷</button>
+      <button class="btn operator" data-value="×" aria-label="multiply">×</button>
+
+      <!-- Numbers and operators -->
+      <button class="btn" data-value="7">7</button>
+      <button class="btn" data-value="8">8</button>
+      <button class="btn" data-value="9">9</button>
+      <button class="btn operator" data-value="-" aria-label="subtract">-</button>
+
+      <button class="btn" data-value="4">4</button>
+      <button class="btn" data-value="5">5</button>
+      <button class="btn" data-value="6">6</button>
+      <button class="btn operator" data-value="+" aria-label="add">+</button>
+
+      <button class="btn" data-value="1">1</button>
+      <button class="btn" data-value="2">2</button>
+      <button class="btn" data-value="3">3</button>
+      <button class="btn span-2 equals" data-action="evaluate" aria-label="equals">=</button>
+
+      <button class="btn" data-value="0">0</button>
+      <button class="btn" data-value=".">.</button>
+    </section>
+
+    <footer class="footer">
+      <div class="memory-indicator" id="memoryIndicator" aria-live="polite"></div>
+      <div class="credits">Calculator • keyboard: numbers, + - * / ^, Enter=equals, Backspace=DEL, Escape=C</div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
