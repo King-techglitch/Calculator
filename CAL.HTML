@@ -1,87 +1,729 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Scientific Calculator</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playful Calculator Adventure</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti Library for dynamic celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Bubblegum Sans for maximal playfulness -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .font-bubble {
+            font-family: 'Bubblegum Sans', cursive;
+        }
+
+        /* Fun Wobble / Pop Animations for Buttons */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-6deg) scale(1.08); }
+            75% { transform: rotate(6deg) scale(1.08); }
+        }
+
+        @keyframes bounceMascot {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.05, 0.95); }
+        }
+
+        @keyframes confusedGiggle {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-12deg) translateX(-4px); }
+            40% { transform: rotate(12deg) translateX(4px); }
+            60% { transform: rotate(-8deg); }
+            80% { transform: rotate(8deg); }
+        }
+
+        @keyframes floatBubble {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-15px) rotate(10deg); opacity: 1; }
+            100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .animate-wobble:hover {
+            animation: wobble 0.4s ease-in-out infinite alternate;
+        }
+
+        .animate-mascot-idle {
+            animation: bounceMascot 2.5s ease-in-out infinite;
+        }
+
+        .animate-mascot-confused {
+            animation: confusedGiggle 0.6s ease-in-out;
+        }
+
+        /* Tactile Key Press Visual Feedback */
+        .calc-btn {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 0 var(--btn-shadow-color, rgba(0, 0, 0, 0.25));
+        }
+
+        .calc-btn:active {
+            transform: translateY(5px) scale(0.96) !important;
+            box-shadow: 0 1px 0 var(--btn-shadow-color, rgba(0, 0, 0, 0.25)) !important;
+        }
+
+        /* Custom Scrollbar for Receipt */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+        }
+
+        /* Zig-zag Receipt Border Edge */
+        .receipt-edge {
+            background: radial-gradient(circle, transparent, transparent 50%, #ffffff 50%, #ffffff 100%);
+            background-size: 16px 16px;
+            background-position: -8px -8px;
+        }
+
+        /* Theme Styling Configurations */
+        .theme-monster {
+            --bg-gradient: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
+            --calc-bg: #fff5f7;
+            --calc-border: #ff85a2;
+            --display-bg: #ffe3e8;
+            --display-text: #5c1d2e;
+            --btn-num-bg: #ffffff;
+            --btn-num-text: #ff477e;
+            --btn-num-shadow: #ffb3c6;
+            --btn-op-bg: #ff7096;
+            --btn-op-text: #ffffff;
+            --btn-op-shadow: #c93b63;
+            --btn-action-bg: #ff9ebb;
+            --btn-action-text: #ffffff;
+            --btn-action-shadow: #d46384;
+            --btn-equal-bg: #ff1493;
+            --btn-equal-text: #ffffff;
+            --btn-equal-shadow: #990055;
+        }
+
+        .theme-candy {
+            --bg-gradient: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            --calc-bg: #f4f9ff;
+            --calc-border: #70a1ff;
+            --display-bg: #e1eeff;
+            --display-text: #1e3799;
+            --btn-num-bg: #ffffff;
+            --btn-num-text: #3742fa;
+            --btn-num-shadow: #a4b0be;
+            --btn-op-bg: #70a1ff;
+            --btn-op-text: #ffffff;
+            --btn-op-shadow: #1e90ff;
+            --btn-action-bg: #7bed9f;
+            --btn-action-text: #2ed573;
+            --btn-action-shadow: #2ed573;
+            --btn-equal-bg: #ff6b81;
+            --btn-equal-text: #ffffff;
+            --btn-equal-shadow: #ff4757;
+        }
+
+        .theme-space {
+            --bg-gradient: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
+            --calc-bg: #1e1b4b;
+            --calc-border: #818cf8;
+            --display-bg: #312e81;
+            --display-text: #e0e7ff;
+            --btn-num-bg: #3730a3;
+            --btn-num-text: #c7d2fe;
+            --btn-num-shadow: #1e1b4b;
+            --btn-op-bg: #6366f1;
+            --btn-op-text: #ffffff;
+            --btn-op-shadow: #4338ca;
+            --btn-action-bg: #a855f7;
+            --btn-action-text: #ffffff;
+            --btn-action-shadow: #7e22ce;
+            --btn-equal-bg: #f43f5e;
+            --btn-equal-text: #ffffff;
+            --btn-equal-shadow: #be123c;
+        }
+    </style>
 </head>
-<body>
-  <main class="calculator" role="application" aria-label="Scientific calculator">
-    <header class="top-row">
-      <div class="display-wrap">
-        <div class="display" id="display" aria-live="polite" role="status">0</div>
-        <div class="subdisplay" id="subdisplay" aria-hidden="true"></div>
-      </div>
+<body class="theme-monster min-h-screen bg-cover flex items-center justify-center p-3 sm:p-6 transition-all duration-500" style="background: var(--bg-gradient);">
 
-      <div class="history-panel" id="historyPanel" aria-label="History">
-        <div class="history-header">
-          <span>History</span>
-          <div class="history-actions">
-            <button class="history-btn" id="clearHistory" title="Clear history">Clear</button>
-            <button class="history-btn" id="toggleHistory" title="Toggle history">Hide</button>
-          </div>
+    <div class="w-full max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 items-stretch justify-center">
+
+        <!-- CALCULATOR MAIN BOARD -->
+        <div class="flex-1 max-w-md mx-auto w-full rounded-3xl p-5 sm:p-7 border-4 shadow-2xl relative overflow-hidden transition-all duration-300" 
+             style="background-color: var(--calc-bg); border-color: var(--calc-border);">
+            
+            <!-- Floating Decorative Background Bubbles -->
+            <div class="absolute -top-10 -left-10 w-24 h-24 bg-white/20 rounded-full pointer-events-none animate-[floatBubble_4s_infinite_ease-in-out]"></div>
+            <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-white/20 rounded-full pointer-events-none animate-[floatBubble_5s_infinite_ease-in-out_1s]"></div>
+
+            <!-- TOP TOOLBAR: Theme Switch & Mute Toggle -->
+            <div class="flex items-center justify-between mb-4 relative z-10">
+                <!-- Theme Selector -->
+                <div class="flex gap-2 bg-black/10 p-1.5 rounded-2xl backdrop-blur-sm">
+                    <button onclick="setTheme('monster')" title="Monster Snack" class="w-8 h-8 rounded-xl bg-pink-400 hover:scale-110 active:scale-95 transition-transform flex items-center justify-center text-xs">🍬</button>
+                    <button onclick="setTheme('candy')" title="Candy Kingdom" class="w-8 h-8 rounded-xl bg-blue-400 hover:scale-110 active:scale-95 transition-transform flex items-center justify-center text-xs">🍦</button>
+                    <button onclick="setTheme('space')" title="Cosmic Quest" class="w-8 h-8 rounded-xl bg-indigo-600 hover:scale-110 active:scale-95 transition-transform flex items-center justify-center text-xs">🚀</button>
+                </div>
+
+                <!-- Sound Toggle Button -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/60 hover:bg-white text-gray-700 font-bold text-sm shadow-sm transition-all active:scale-95">
+                    <i id="soundIcon" class="fas fa-volume-up text-pink-500"></i>
+                    <span id="soundLabel" class="hidden sm:inline">Sound ON</span>
+                </button>
+            </div>
+
+            <!-- MASCOT & REACTION DISPLAY -->
+            <div class="flex items-center justify-between px-2 mb-2">
+                <div class="flex items-center gap-3">
+                    <!-- Mascot Animated Avatar -->
+                    <div id="mascotAvatar" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/80 border-2 border-pink-300 flex items-center justify-center text-3xl sm:text-4xl shadow-md animate-mascot-idle transition-all duration-300 cursor-pointer" onclick="petMascot()">
+                        👾
+                    </div>
+                    <!-- Mascot Speech Bubble -->
+                    <div class="relative bg-white/90 px-3 py-1.5 rounded-2xl border-2 border-pink-200 text-xs sm:text-sm font-bold text-gray-700 shadow-sm">
+                        <span id="mascotSpeech">Feed me numbers! Nom nom!</span>
+                        <!-- Speech Bubble Arrow -->
+                        <div class="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-r-8 border-r-white/90 border-b-4 border-b-transparent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALCULATOR DISPLAY SCREEN -->
+            <div class="w-full rounded-2xl p-4 mb-5 border-2 shadow-inner text-right relative overflow-hidden transition-colors duration-300"
+                 style="background-color: var(--display-bg); border-color: var(--calc-border);">
+                <!-- Math Formula Expression Line -->
+                <div id="expressionDisplay" class="h-6 text-sm font-semibold opacity-60 overflow-hidden text-ellipsis whitespace-nowrap"
+                     style="color: var(--display-text);">
+                    0
+                </div>
+                <!-- Main Value Display -->
+                <div id="calcDisplay" class="text-3xl sm:text-4xl font-extrabold tracking-wider overflow-x-auto whitespace-nowrap scrollbar-none transition-all"
+                     style="color: var(--display-text);">
+                    0
+                </div>
+            </div>
+
+            <!-- KEYPAD BUTTONS GRID -->
+            <div class="grid grid-cols-4 gap-2.5 sm:gap-3">
+                
+                <!-- ROW 1: Clear, Scientific Ops, Backspace -->
+                <button onclick="handleAction('clear')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-lg sm:text-xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-action-bg); color: var(--btn-action-text); --btn-shadow-color: var(--btn-action-shadow);">
+                    C
+                </button>
+                <button onclick="handleOp('sqrt')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-lg sm:text-xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-action-bg); color: var(--btn-action-text); --btn-shadow-color: var(--btn-action-shadow);">
+                    √
+                </button>
+                <button onclick="handleOp('%')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-lg sm:text-xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-action-bg); color: var(--btn-action-text); --btn-shadow-color: var(--btn-action-shadow);">
+                    %
+                </button>
+                <button onclick="handleAction('backspace')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-lg sm:text-xl active:scale-95 animate-wobble flex items-center justify-center"
+                        style="background-color: var(--btn-action-bg); color: var(--btn-action-text); --btn-shadow-color: var(--btn-action-shadow);">
+                    <i class="fas fa-backspace"></i>
+                </button>
+
+                <!-- ROW 2: 7, 8, 9, Divide -->
+                <button onclick="handleNum('7')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">7</button>
+                <button onclick="handleNum('8')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">8</button>
+                <button onclick="handleNum('9')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">9</button>
+                <button onclick="handleOp('/')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-op-bg); color: var(--btn-op-text); --btn-shadow-color: var(--btn-op-shadow);">÷</button>
+
+                <!-- ROW 3: 4, 5, 6, Multiply -->
+                <button onclick="handleNum('4')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">4</button>
+                <button onclick="handleNum('5')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">5</button>
+                <button onclick="handleNum('6')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">6</button>
+                <button onclick="handleOp('*')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-op-bg); color: var(--btn-op-text); --btn-shadow-color: var(--btn-op-shadow);">×</button>
+
+                <!-- ROW 4: 1, 2, 3, Subtract -->
+                <button onclick="handleNum('1')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">1</button>
+                <button onclick="handleNum('2')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">2</button>
+                <button onclick="handleNum('3')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">3</button>
+                <button onclick="handleOp('-')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-op-bg); color: var(--btn-op-text); --btn-shadow-color: var(--btn-op-shadow);">-</button>
+
+                <!-- ROW 5: Toggle Sign, 0, Decimal, Add -->
+                <button onclick="handleAction('toggleSign')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-lg sm:text-xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">±</button>
+                <button onclick="handleNum('0')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">0</button>
+                <button onclick="handleAction('dot')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-num-bg); color: var(--btn-num-text); --btn-shadow-color: var(--btn-num-shadow);">.</button>
+                <button onclick="handleOp('+')" class="calc-btn p-3 sm:p-4 rounded-2xl font-bold text-xl sm:text-2xl active:scale-95 animate-wobble"
+                        style="background-color: var(--btn-op-bg); color: var(--btn-op-text); --btn-shadow-color: var(--btn-op-shadow);">+</button>
+
+                <!-- ROW 6: Equals Button (Spans 4 columns) -->
+                <button onclick="calculate()" class="calc-btn col-span-4 p-4 rounded-2xl font-extrabold text-2xl active:scale-95 animate-wobble flex items-center justify-center gap-2"
+                        style="background-color: var(--btn-equal-bg); color: var(--btn-equal-text); --btn-shadow-color: var(--btn-equal-shadow);">
+                    <span>=</span>
+                    <span class="text-xs uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full" id="equalBadge">Crunch!</span>
+                </button>
+            </div>
         </div>
-        <ul id="historyList" class="history-list" aria-live="polite"></ul>
-      </div>
-    </header>
 
-    <section class="keys" role="group" aria-label="Calculator keys">
-      <!-- Memory row -->
-      <button class="btn mem" data-action="mc" aria-label="Memory clear">MC</button>
-      <button class="btn mem" data-action="mr" aria-label="Memory recall">MR</button>
-      <button class="btn mem" data-action="mplus" aria-label="Memory add">M+</button>
-      <button class="btn mem" data-action="mminus" aria-label="Memory subtract">M-</button>
+        <!-- PLAYFUL RECIEPT / ADVENTURE HISTORY LOG -->
+        <div class="w-full lg:w-80 bg-white rounded-3xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden border-2 border-gray-100">
+            <!-- Receipt Header -->
+            <div>
+                <div class="flex items-center justify-between pb-3 border-b-2 border-dashed border-gray-200 mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-receipt text-pink-500 text-lg"></i>
+                        <h2 class="font-extrabold text-gray-800 text-lg tracking-wide" id="historyTitle">Snack Receipt</h2>
+                    </div>
+                    <button onclick="clearHistory()" title="Clear Receipt" class="text-xs font-bold text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition-colors">
+                        Clear
+                    </button>
+                </div>
 
-      <!-- Scientific functions row -->
-      <button class="btn func" data-func="sin" aria-label="sine">sin</button>
-      <button class="btn func" data-func="cos" aria-label="cosine">cos</button>
-      <button class="btn func" data-func="tan" aria-label="tangent">tan</button>
-      <button class="btn func" data-func="^" aria-label="power">x^y</button>
+                <p class="text-xs text-gray-400 mb-2 italic" id="historySubtitle">Your mathematical treats log:</p>
 
-      <button class="btn func" data-func="ln" aria-label="natural log">ln</button>
-      <button class="btn func" data-func="log" aria-label="base-10 log">log</button>
-      <button class="btn func" data-func="pow" aria-label="power function">pow</button>
-      <button class="btn func" data-func="sqrt" aria-label="square root">√</button>
+                <!-- Receipt Scrollable Content Container -->
+                <div id="historyLog" class="max-h-64 lg:max-h-96 overflow-y-auto space-y-2 pr-1 font-mono text-sm">
+                    <div class="text-center text-gray-400 py-8 text-xs font-sans italic">
+                        No calculations yet.<br>Start feeding the monster! 🍩
+                    </div>
+                </div>
+            </div>
 
-      <!-- Functions / parentheses -->
-      <button class="btn" data-action="percent" aria-label="percent">%</button>
-      <button class="btn" data-action="paren" data-value="(" aria-label="open parenthesis">(</button>
-      <button class="btn" data-action="paren" data-value=")" aria-label="close parenthesis">)</button>
-      <button class="btn" data-action="toggleSign" aria-label="plus minus">+/-</button>
+            <!-- Receipt Bottom Visual Tail -->
+            <div class="mt-4 pt-3 border-t-2 border-dashed border-gray-200 text-center">
+                <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1" id="receiptFooterTag">Thank you for playing!</div>
+                <div class="flex justify-center gap-1 text-pink-400 text-xs">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+            </div>
+        </div>
 
-      <!-- Control row -->
-      <button class="btn" data-action="clear" aria-label="clear">C</button>
-      <button class="btn" data-action="delete" aria-label="delete">DEL</button>
-      <button class="btn operator" data-value="÷" aria-label="divide">÷</button>
-      <button class="btn operator" data-value="×" aria-label="multiply">×</button>
+    </div>
 
-      <!-- Numbers and operators -->
-      <button class="btn" data-value="7">7</button>
-      <button class="btn" data-value="8">8</button>
-      <button class="btn" data-value="9">9</button>
-      <button class="btn operator" data-value="-" aria-label="subtract">-</button>
+    <script>
+        // Core State Variables
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let shouldResetDisplay = false;
+        let isMuted = false;
+        let currentTheme = 'monster';
+        let history = [];
 
-      <button class="btn" data-value="4">4</button>
-      <button class="btn" data-value="5">5</button>
-      <button class="btn" data-value="6">6</button>
-      <button class="btn operator" data-value="+" aria-label="add">+</button>
+        // Audio Context Initialization for synthesized sound effects
+        let audioCtx = null;
 
-      <button class="btn" data-value="1">1</button>
-      <button class="btn" data-value="2">2</button>
-      <button class="btn" data-value="3">3</button>
-      <button class="btn span-2 equals" data-action="evaluate" aria-label="equals">=</button>
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
 
-      <button class="btn" data-value="0">0</button>
-      <button class="btn" data-value=".">.</button>
-    </section>
+        // Synthesizing playful procedural sounds
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
 
-    <footer class="footer">
-      <div class="memory-indicator" id="memoryIndicator" aria-live="polite"></div>
-      <div class="credits">Calculator • keyboard: numbers, + - * / ^, Enter=equals, Backspace=DEL, Escape=C</div>
-    </footer>
-  </main>
+                if (type === 'pop') {
+                    // Bubble Pop Sound
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
 
-  <script src="script.js"></script>
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } 
+                else if (type === 'crunch') {
+                    // Equal Crunch Celebration Sound
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                    
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } 
+                else if (type === 'boing') {
+                    // Error / Confusion Sound
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+                else if (type === 'clear') {
+                    // Sweeping Clear Sound
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                }
+            } catch (e) {
+                console.warn('Audio playback error:', e);
+            }
+        }
+
+        // Theme Configurations & Quotes
+        const themeConfigs = {
+            monster: {
+                mascot: '👾',
+                idleSpeech: 'Feed me numbers! Nom nom!',
+                successSpeech: 'Yummy result! Crunch!',
+                errorSpeech: 'Ouch! Can\'t eat divide-by-zero!',
+                equalBadge: 'Crunch!',
+                historyTitle: 'Snack Receipt',
+                historySubtitle: 'Your mathematical treats log:'
+            },
+            candy: {
+                mascot: '🦄',
+                idleSpeech: 'Let\'s bake sweet math!',
+                successSpeech: 'Super sweet calculated!',
+                errorSpeech: 'Oopsie! Sweetness overload!',
+                equalBadge: 'Bake!',
+                historyTitle: 'Candy Menu',
+                historySubtitle: 'Your recipe of numbers:'
+            },
+            space: {
+                mascot: '🤖',
+                idleSpeech: 'Systems online. Input data.',
+                successSpeech: 'Trajectory calculated!',
+                errorSpeech: 'Warning! System anomaly!',
+                equalBadge: 'Launch!',
+                historyTitle: 'Cosmic Log',
+                historySubtitle: 'Intergalactic math record:'
+            }
+        };
+
+        function updateDisplay() {
+            const displayEl = document.getElementById('calcDisplay');
+            const exprEl = document.getElementById('expressionDisplay');
+            
+            displayEl.innerText = currentInput;
+            
+            if (operation) {
+                const opSymbol = operation === '*' ? '×' : operation === '/' ? '÷' : operation;
+                exprEl.innerText = `${previousInput} ${opSymbol}`;
+            } else {
+                exprEl.innerText = '';
+            }
+        }
+
+        function setMascotExpression(emoji, speech, statusClass = '') {
+            const mascotAvatar = document.getElementById('mascotAvatar');
+            const mascotSpeech = document.getElementById('mascotSpeech');
+            
+            mascotAvatar.innerText = emoji;
+            mascotSpeech.innerText = speech;
+
+            if (statusClass) {
+                mascotAvatar.classList.add(statusClass);
+                setTimeout(() => mascotAvatar.classList.remove(statusClass), 600);
+            }
+        }
+
+        function handleNum(num) {
+            playSound('pop');
+            if (currentInput === '0' || shouldResetDisplay) {
+                currentInput = num;
+                shouldResetDisplay = false;
+            } else {
+                if (currentInput.length < 12) {
+                    currentInput += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function handleAction(action) {
+            playSound('pop');
+            if (action === 'clear') {
+                playSound('clear');
+                currentInput = '0';
+                previousInput = '';
+                operation = null;
+                const config = themeConfigs[currentTheme];
+                setMascotExpression(config.mascot, config.idleSpeech);
+            } else if (action === 'backspace') {
+                if (currentInput.length > 1) {
+                    currentInput = currentInput.slice(0, -1);
+                } else {
+                    currentInput = '0';
+                }
+            } else if (action === 'dot') {
+                if (!currentInput.includes('.')) {
+                    currentInput += '.';
+                }
+            } else if (action === 'toggleSign') {
+                currentInput = (parseFloat(currentInput) * -1).toString();
+            }
+            updateDisplay();
+        }
+
+        function handleOp(op) {
+            playSound('pop');
+            if (op === 'sqrt') {
+                const val = parseFloat(currentInput);
+                if (val < 0) {
+                    triggerError('Invalid Input');
+                    return;
+                }
+                const res = Math.sqrt(val);
+                addHistory(`√(${val})`, res);
+                currentInput = Number.isInteger(res) ? res.toString() : res.toFixed(4).replace(/\.?0+$/, '');
+                shouldResetDisplay = true;
+                triggerSuccess();
+                updateDisplay();
+                return;
+            }
+
+            if (op === '%') {
+                const val = parseFloat(currentInput);
+                const res = val / 100;
+                addHistory(`${val}%`, res);
+                currentInput = res.toString();
+                shouldResetDisplay = true;
+                updateDisplay();
+                return;
+            }
+
+            if (operation !== null) {
+                calculate(false);
+            }
+
+            previousInput = currentInput;
+            operation = op;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function calculate(isFinal = true) {
+            if (!operation || !previousInput) return;
+
+            const prev = parseFloat(previousInput);
+            const curr = parseFloat(currentInput);
+            let result = 0;
+            const opSymbol = operation === '*' ? '×' : operation === '/' ? '÷' : operation;
+
+            if (operation === '/' && curr === 0) {
+                triggerError('Division by Zero');
+                return;
+            }
+
+            switch (operation) {
+                case '+': result = prev + curr; break;
+                case '-': result = prev - curr; break;
+                case '*': result = prev * curr; break;
+                case '/': result = prev / curr; break;
+            }
+
+            // Format result smartly
+            const formattedResult = Number.isInteger(result) 
+                ? result.toString() 
+                : parseFloat(result.toFixed(6)).toString();
+
+            if (isFinal) {
+                addHistory(`${prev} ${opSymbol} ${curr}`, formattedResult);
+                triggerSuccess();
+            }
+
+            currentInput = formattedResult;
+            operation = null;
+            previousInput = '';
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function triggerSuccess() {
+            playSound('crunch');
+            const config = themeConfigs[currentTheme];
+            
+            // Check for large numbers or special results
+            const val = Math.abs(parseFloat(currentInput));
+            if (val > 9999) {
+                setMascotExpression('🌟', 'Whoa! Mega big number!', 'animate-mascot-idle');
+            } else {
+                setMascotExpression('🎉', config.successSpeech, 'animate-mascot-idle');
+            }
+
+            // Launch colorful celebratory confetti burst
+            confetti({
+                particleCount: 40,
+                spread: 60,
+                origin: { y: 0.7 }
+            });
+        }
+
+        function triggerError(msg) {
+            playSound('boing');
+            const config = themeConfigs[currentTheme];
+            currentInput = 'Error';
+            setMascotExpression('😵', config.errorSpeech, 'animate-mascot-confused');
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function petMascot() {
+            playSound('pop');
+            const playfulResponses = ['Hehe! That tickles! 💖', 'More math treats please! 🍪', 'You are awesome! ⭐', 'Wooohooo! 🚀'];
+            const randomMsg = playfulResponses[Math.floor(Math.random() * playfulResponses.length)];
+            setMascotExpression('🥰', randomMsg, 'animate-mascot-idle');
+        }
+
+        // History Receipt Management
+        function addHistory(expr, result) {
+            history.unshift({ expr, result });
+            if (history.length > 15) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const logEl = document.getElementById('historyLog');
+            if (history.length === 0) {
+                logEl.innerHTML = `
+                    <div class="text-center text-gray-400 py-8 text-xs font-sans italic">
+                        No calculations yet.<br>Start feeding the monster! 🍩
+                    </div>`;
+                return;
+            }
+
+            logEl.innerHTML = history.map((item, idx) => `
+                <div class="p-2.5 bg-gray-50 rounded-xl border border-gray-100 flex justify-between items-center hover:bg-pink-50 transition-colors animate-pop">
+                    <span class="text-gray-500 text-xs">${item.expr} =</span>
+                    <span class="font-bold text-pink-600 text-sm">${item.result}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            playSound('clear');
+            history = [];
+            renderHistory();
+        }
+
+        function setTheme(themeName) {
+            playSound('pop');
+            currentTheme = themeName;
+            document.body.className = `theme-${themeName} min-h-screen bg-cover flex items-center justify-center p-3 sm:p-6 transition-all duration-500`;
+
+            const config = themeConfigs[themeName];
+            document.getElementById('mascotAvatar').innerText = config.mascot;
+            document.getElementById('mascotSpeech').innerText = config.idleSpeech;
+            document.getElementById('equalBadge').innerText = config.equalBadge;
+            document.getElementById('historyTitle').innerText = config.historyTitle;
+            document.getElementById('historySubtitle').innerText = config.historySubtitle;
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const soundIcon = document.getElementById('soundIcon');
+            const soundLabel = document.getElementById('soundLabel');
+
+            if (isMuted) {
+                soundIcon.className = 'fas fa-volume-mute text-gray-400';
+                soundLabel.innerText = 'Muted';
+            } else {
+                soundIcon.className = 'fas fa-volume-up text-pink-500';
+                soundLabel.innerText = 'Sound ON';
+                playSound('pop');
+            }
+        }
+
+        // Full Keyboard Support
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                handleNum(e.key);
+            } else if (e.key === '.') {
+                handleAction('dot');
+            } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+                handleOp(e.key);
+            } else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calculate();
+            } else if (e.key === 'Backspace') {
+                handleAction('backspace');
+            } else if (e.key === 'Escape') {
+                handleAction('clear');
+            } else if (e.key === '%') {
+                handleOp('%');
+            }
+        });
+
+        // Initialize display on load
+        window.onload = function() {
+            updateDisplay();
+        };
+    </script>
 </body>
 </html>
